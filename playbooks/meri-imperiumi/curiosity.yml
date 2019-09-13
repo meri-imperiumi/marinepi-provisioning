@@ -23,6 +23,7 @@
         - bluez
         - libbluetooth-dev
         - libudev-dev
+        - libcap2-bin
         - vim
 
   roles:
@@ -82,6 +83,8 @@
         dest: /home/pi/.signalk
       delegate_to: "{{ inventory_hostname }}"
       become: no
+    - name: Allow Signal K to talk BLE
+      shell: setcap cap_net_raw+eip /usr/bin/node
     - name: Restart signalk-server
       service:
         name: signalk-server
