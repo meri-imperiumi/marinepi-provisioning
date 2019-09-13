@@ -12,6 +12,19 @@
   vars_files:
     - curiosity-secrets.yml
 
+  pre_tasks:
+    - name: Install additional packages
+      apt:
+        name: "{{ packages }}"
+        state: latest
+      vars:
+        packages:
+        - bluetooth
+        - bluez
+        - libbluetooth-dev
+        - libudev-dev
+        - vim
+
   roles:
     - role: common
     - role: signalk
@@ -26,6 +39,9 @@
       - plugin_name: "signalk-raspberry-pi-bme280"
       - plugin_name: "signalk-raspberry-pi-temperature"
       - plugin_name: "@meri-imperiumi/signalk-aws-iot"
+      - plugin_name: "@signalk/udp-nmea-plugin"
+      - plugin_name: "signalk-ruuvitag-plugin" # npm install "https://github.com/jrobeson/node-bluetooth-hci-socket/#fix-builds-for-node-10"
+      - plugin_name: "signalk-derived-data"
     - role: s3-upload
       s3_upload_name: "signalk-raw-logs"
       s3_upload_src_dir: "/home/pi/.signalk"
@@ -60,7 +76,7 @@
         dest: /home/pi/.signalk/defaults.json
         remote_src: yes
       become: no
-    - name: Synchronize two directories on one remote host.
+    - name: Copy Signal K plugin configuration
       synchronize:
         src: /home/pi/curiosity/signalk/plugin-config-data
         dest: /home/pi/.signalk
